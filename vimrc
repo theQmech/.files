@@ -67,6 +67,7 @@ nnoremap <C-S-Tab> :bp<CR>
 filetype plugin on
 call plug#begin()
 Plug 'morhetz/gruvbox'
+Plug 'ycm-core/YouCompleteMe'
 call plug#end()
 
 " color scheme
