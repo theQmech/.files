@@ -73,3 +73,7 @@ call plug#end()
 " color scheme
 colorscheme gruvbox
 set background=dark
+
+" YCM close preview window automatically
+let g:ycm_autoclose_preview_window_after_completion = 1
+
