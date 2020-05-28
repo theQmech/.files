@@ -68,6 +68,7 @@ filetype plugin on
 call plug#begin()
 Plug 'morhetz/gruvbox'
 Plug 'ycm-core/YouCompleteMe'
+Plug 'google/yapf'
 call plug#end()
 
 " color scheme
