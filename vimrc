@@ -69,7 +69,11 @@ call plug#begin()
 Plug 'morhetz/gruvbox'
 Plug 'ycm-core/YouCompleteMe'
 Plug 'google/yapf'
+Plug 'preservim/nerdcommenter'
 call plug#end()
+
+" Add spaces after comment delimiters by default
+let g:NERDSpaceDelims = 1
 
 " color scheme
 colorscheme gruvbox
