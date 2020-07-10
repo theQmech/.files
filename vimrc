@@ -59,10 +59,6 @@ let python_highlight_all = 1
 " for python files
 nnoremap <leader>d oimport pdb; pdb.set_trace()<Esc>
 
-" Control Shift Tab shortcuts for switching buffers
-nnoremap <C-Tab> :bn<CR>
-nnoremap <C-S-Tab> :bp<CR>
-
 " plugins
 filetype plugin on
 call plug#begin()
