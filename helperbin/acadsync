@@ -1,0 +1,36 @@
+#!/bin/bash
+
+link=".coursepage"
+if [ $# -eq 0 ];
+then
+	if [ -f $link ];
+	then
+		while read line; 
+		do 
+			wget -np -nd -r -N -A pdf,txt -e robots=off $line; 
+		done < $link
+	else
+		echo "No link file found nor input link given"
+	fi
+else
+	if [ -f $link ];
+	then
+		a=1
+		while read line; 
+		do 
+			if [ $line -eq $1];
+			then
+				a=0;
+			fi 
+		done < $link
+		if [ $a -eq 1 ]
+		then
+			echo $1 >>$link;
+		fi
+	else
+		echo $1 > $link;
+	fi
+	wget -np -nd -r -N -A pdf,txt -e robots=off $1;
+fi
+
+rm -rf robots*

@@ -1,0 +1,25 @@
+#!/usr/bin/zsh
+
+if [ "$#" -ne 1 ]
+then
+    # no *.tex file passed, glob all tex files
+    files=(./*.tex)
+else
+    files=( "$@" )
+fi
+
+mkdir -p build
+
+for f in $files
+do
+    if [[ $f == *.tex ]]
+    then
+        pdflatex -output-directory=build $f
+    else
+        echo Invalid file $f
+    fi
+done
+
+mv build/*.pdf .
+rm -rf build
+

@@ -4,8 +4,10 @@
       force: true
 
 - link:
+    ~/.zshrc: zshrc
     ~/.vimrc: vimrc
     ~/.tmux.conf: tmux.conf
+    ~/helperbin : helperbin
 
 - create:
     - ~/.vim/undo
