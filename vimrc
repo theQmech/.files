@@ -34,14 +34,21 @@ nnoremap <C-l> <C-w>l
 inoremap {      {}<Left>
 inoremap {<CR>  {<CR>}<Esc>O
 
-" F2 will save the file
-nmap <F2> :w<CR>
-" in insert mode F2 will exit insert, save, enter insert again
-imap <F2> <ESC>:w<CR>a
-" Press F3 to toggle highlighting on/off, and show current value.
-:noremap <F3> :set hlsearch! hlsearch?<CR>
+" make spacebar leader key
+nnoremap <SPACE> <Nop>
+let mapleader=" "
+
+" save current file
+noremap <Leader>s :w<CR>
+" save all
+noremap <Leader>S :wa<CR>
+
+" Toggle highlighting on/off, and show current value.
+:noremap <F2> :set hlsearch! hlsearch?<CR>
+" save all and make
+map <F3> <ESC>:wa<CR>:!make<CR>
 " toggle spellcheck
-map <F4> :setlocal spell! spelllang=en_us<CR>
+map <F4> <ESC>:setlocal spell! spelllang=en_us<CR>
 
 " save undo history across sessions
 set undofile
@@ -66,6 +73,7 @@ Plug 'morhetz/gruvbox'
 Plug 'ycm-core/YouCompleteMe'
 Plug 'google/yapf'
 Plug 'preservim/nerdcommenter'
+Plug 'airblade/vim-gitgutter'
 call plug#end()
 
 " Add spaces after comment delimiters by default
@@ -77,4 +85,7 @@ set background=dark
 
 " YCM close preview window automatically
 let g:ycm_autoclose_preview_window_after_completion = 1
+
+" Toglle GitGutter
+noremap <Leader>g :GitGutterToggle<CR>
 
