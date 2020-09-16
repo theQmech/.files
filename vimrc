@@ -74,6 +74,7 @@ Plug 'ycm-core/YouCompleteMe'
 Plug 'google/yapf'
 Plug 'preservim/nerdcommenter'
 Plug 'airblade/vim-gitgutter'
+Plug 'jceb/vim-orgmode'
 call plug#end()
 
 " Add spaces after comment delimiters by default
