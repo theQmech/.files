@@ -1,0 +1,7 @@
+[user]
+	email = rupanshu.ganvir@gmail.com
+	name = Rupanshu Ganvir
+[core]
+	editor = vim
+[alias]
+    co = checkout

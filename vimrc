@@ -74,11 +74,14 @@ Plug 'ycm-core/YouCompleteMe'
 Plug 'google/yapf'
 Plug 'preservim/nerdcommenter'
 Plug 'airblade/vim-gitgutter'
-Plug 'jceb/vim-orgmode'
 call plug#end()
 
 " Add spaces after comment delimiters by default
 let g:NERDSpaceDelims = 1
+" Disable default mappings
+let g:NERDCreateDefaultMappings = 0
+" Toggle is the only functionality desired
+nnoremap <Leader>ci :call NERDComment(0,"toggle")<CR>
 
 " color scheme
 colorscheme gruvbox
@@ -87,6 +90,6 @@ set background=dark
 " YCM close preview window automatically
 let g:ycm_autoclose_preview_window_after_completion = 1
 
-" Toglle GitGutter
+" Toggle GitGutter
 noremap <Leader>g :GitGutterToggle<CR>
 
