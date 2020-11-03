@@ -66,6 +66,13 @@ let python_highlight_all = 1
 " for python files
 nnoremap <leader>d oimport pdb; pdb.set_trace()<Esc>
 
+" install vim-plug if not installed
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
 " plugins
 filetype plugin on
 call plug#begin()
