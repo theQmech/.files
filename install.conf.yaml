@@ -9,6 +9,7 @@
     ~/.tmux.conf: tmux.conf
     ~/.gitconfig: gitconfig
     ~/helperbin : helperbin
+    ~/.config/terminator : terminator
 
 - create:
     - ~/.vim/undo
