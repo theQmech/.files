@@ -7,3 +7,5 @@
     co = checkout
     current = rev-parse --abbrev-ref HEAD
     pushfresh = !CURRENT=$(git current) && git push --set-upstream origin $CURRENT
+[pull]
+    ff = only
