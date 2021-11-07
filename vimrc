@@ -1,3 +1,5 @@
+set t_Co=256
+
 set nocompatible " disable vi compatibility
 syntax on " turn syntax highlighting on 
 set number relativenumber " turn hybrid line numbers on
@@ -76,11 +78,11 @@ endif
 " plugins
 filetype plugin on
 call plug#begin()
-Plug 'morhetz/gruvbox'
-Plug 'ycm-core/YouCompleteMe'
 Plug 'google/yapf'
 Plug 'preservim/nerdcommenter'
 Plug 'airblade/vim-gitgutter'
+" install gruvbox at end
+Plug 'morhetz/gruvbox'
 call plug#end()
 
 " Add spaces after comment delimiters by default
