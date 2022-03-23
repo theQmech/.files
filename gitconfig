@@ -3,9 +3,17 @@
 	name = Rupanshu Ganvir
 [core]
 	editor = vim
+	autocrlf = input
 [alias]
     co = checkout
     current = rev-parse --abbrev-ref HEAD
     pushfresh = !CURRENT=$(git current) && git push --set-upstream origin $CURRENT
+    pushpls = push --force-with-lease
+    pullpls = !CURRENT=$(git current) && git fetch && git reset --hard origin/$CURRENT
+    lg = log --oneline
+    st = status
+    ct = commit -v
+    rt = reset
+    rb = rebase
 [pull]
     ff = only
