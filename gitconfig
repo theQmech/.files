@@ -4,8 +4,17 @@
 [core]
 	editor = vim
 [alias]
+	st = status
+	cl = clone
     co = checkout
+	cmt = commit
+	cp = cherry-pick
+	pushpls = push --force-with-lease
     current = rev-parse --abbrev-ref HEAD
     pushfresh = !CURRENT=$(git current) && git push --set-upstream origin $CURRENT
+[push]
+	autoSetupRemote = true
 [pull]
     ff = only
+[branch]
+	sort = -committerdate
