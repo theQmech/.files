@@ -102,7 +102,9 @@ install_ohmyzsh() {
     # Download only if the script doesn't already exist
     if [ ! -f ~/install/ohmyzshinstall.sh ]; then
         echo "Downloading Oh My Zsh installer..."
-        wget -O ~/install/ohmyzshinstall.sh https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/ohmyzshinstall.sh || { echo "Download failed"; return 1; }
+        wget -O ~/install/ohmyzshinstall.sh \
+            https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/ohmyzshinstall.sh \
+        || { echo "Download failed"; return 1; }
     else
         echo "Installer script already exists at ~/install/ohmyzshinstall.sh"
     fi
@@ -114,8 +116,15 @@ install_ohmyzsh() {
     echo "Oh My Zsh installation complete!"
 }
 
+install_p10k() {
+    git -C /home/rupanshu/.oh-my-zsh/custom/themes/powerlevel10k pull --depth=1 2>/dev/null \
+    || git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
+        /home/rupanshu/.oh-my-zsh/custom/themes/powerlevel10k
+}
+
 init
 install_debs
 setup_ssh "rupanshu.ganvir@gmail.com"
 install_ohmyzsh
+install_p10k
 setup_dotfiles "https://github.com/theQmech/.files"
