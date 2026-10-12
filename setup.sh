@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Run from your ~/workspace folder 
+# Run from your ~/workspace folder or from inside the .files repo
 
 set -euxo pipefail
 cleanup() {
@@ -26,7 +26,11 @@ setup_ssh() {
     if [[ -f "$key_file" ]] || [[ -f "$ssh_dir/id_rsa" ]]; then
         echo "SSH keys already exist"
         eval "$(ssh-agent -s)" > /dev/null 2>&1
-        [[ -f "$key_file" ]] && ssh-add "$key_file" 2>/dev/null
+        if [[ -f "$key_file" ]]; then
+            ssh-add "$key_file" 2>/dev/null || true
+        elif [[ -f "$ssh_dir/id_rsa" ]]; then
+            ssh-add "$ssh_dir/id_rsa" 2>/dev/null || true
+        fi
         return 0
     fi
     
@@ -51,40 +55,72 @@ setup_ssh() {
 }
 
 install_debs() {
-    sudo apt install git
-    sudo apt install tmux
-    sudo apt install vim
+    sudo apt update
+    sudo apt install -y git tmux vim zsh curl wget
     curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
-    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    vim +PlugInstall +qall
-    sudo apt install zsh
-    sudo apt install curl
-    sudo chsh -s $(which zsh) $USER
+        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    vim +PlugInstall +qall || true
+    if [[ "$SHELL" != *"zsh"* ]]; then
+        sudo chsh -s "$(which zsh)" "$USER"
+    fi
+}
+
+install_tmux_plugins() {
+    local plugins_dir="$HOME/.tmux/plugins"
+    mkdir -p "$plugins_dir"
+
+    # Install / update tmux-resurrect
+    if [[ -d "$plugins_dir/tmux-resurrect" ]]; then
+        echo "Updating tmux-resurrect..."
+        git -C "$plugins_dir/tmux-resurrect" pull --depth=1 2>/dev/null || true
+    else
+        echo "Cloning tmux-resurrect..."
+        git clone --depth=1 https://github.com/tmux-plugins/tmux-resurrect "$plugins_dir/tmux-resurrect"
+    fi
+
+    # Install / update tmux-continuum
+    if [[ -d "$plugins_dir/tmux-continuum" ]]; then
+        echo "Updating tmux-continuum..."
+        git -C "$plugins_dir/tmux-continuum" pull --depth=1 2>/dev/null || true
+    else
+        echo "Cloning tmux-continuum..."
+        git clone --depth=1 https://github.com/tmux-plugins/tmux-continuum "$plugins_dir/tmux-continuum"
+    fi
 }
 
 setup_dotfiles() {
     local url="$1"
-    if [[ -z "$url" ]]; then
-        echo "Usage: setup_dotfiles 'repo_url'"
-        return 1
-    fi
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local dotfiles_dir=""
 
-    if [[ -d ".files" ]]; then
-        echo "Dotfiles repo already cloned. Pulling latest master..."
-        cd .files || { echo "Failed to enter .files directory"; return 1; }
-        git pull origin master || { echo "Failed to pull latest master"; cd ..; return 1; }
-        cd .. || return 1
+    # Check if this script itself is located inside the .files repo
+    if [[ -f "$script_dir/tmux.conf" && -f "$script_dir/gitconfig" ]]; then
+        dotfiles_dir="$script_dir"
+        echo "Using dotfiles from $dotfiles_dir..."
+        git -C "$dotfiles_dir" pull origin master 2>/dev/null || true
+    elif [[ -d ".files" ]]; then
+        echo "Dotfiles repo already cloned at .files. Pulling latest master..."
+        git -C ".files" pull origin master 2>/dev/null || true
+        dotfiles_dir="$(pwd)/.files"
     else
         echo "Cloning dotfiles repo..."
-        git clone "$url" .files || { echo "Failed to clone repository"; return 1; }
+        git clone "$url" .files
+        dotfiles_dir="$(pwd)/.files"
     fi
 
-    # Copy dotfiles with error handling
+    # Copy dotfiles
     echo "Setting up dotfiles..."
-    cp ./.files/gitconfig ~/.gitconfig || { echo "Failed to copy gitconfig"; return 1; }
-    cp ./.files/vimrc ~/.vimrc || { echo "Failed to copy vimrc"; return 1; }
-    vim +PlugInstall +qall
-    cp ./.files/zshrc ~/.zshrc || { echo "Failed to copy zshrc"; return 1; }
+    cp "$dotfiles_dir/gitconfig" ~/.gitconfig
+    cp "$dotfiles_dir/vimrc" ~/.vimrc
+    cp "$dotfiles_dir/tmux.conf" ~/.tmux.conf
+    cp "$dotfiles_dir/zshrc" ~/.zshrc
+
+    # Install vim plugins defined in ~/.vimrc
+    vim +PlugInstall +qall || true
+
+    # Reload tmux config if tmux is running
+    tmux source-file ~/.tmux.conf 2>/dev/null || true
     
     echo "Dotfiles setup complete!"
 }
@@ -97,34 +133,37 @@ install_ohmyzsh() {
     fi
     
     # Create the install directory if it doesn't exist
-    mkdir -p ~/install || { echo "Failed to create ~/install"; return 1; }
+    mkdir -p ~/install
     
     # Download only if the script doesn't already exist
     if [ ! -f ~/install/ohmyzshinstall.sh ]; then
         echo "Downloading Oh My Zsh installer..."
         wget -O ~/install/ohmyzshinstall.sh \
-            https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/ohmyzshinstall.sh \
-        || { echo "Download failed"; return 1; }
+            https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/ohmyzshinstall.sh
     else
         echo "Installer script already exists at ~/install/ohmyzshinstall.sh"
     fi
     
-    # Run the installation
+    # Run the installation unattended (prevents starting interactive zsh subshell)
     echo "Running Oh My Zsh installer..."
-    sh ~/install/ohmyzshinstall.sh || { echo "Installation failed"; return 1; }
+    RUNZSH=no CHSH=no sh ~/install/ohmyzshinstall.sh --unattended
     
     echo "Oh My Zsh installation complete!"
 }
 
 install_p10k() {
-    git -C /home/rupanshu/.oh-my-zsh/custom/themes/powerlevel10k pull --depth=1 2>/dev/null \
-    || git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
-        /home/rupanshu/.oh-my-zsh/custom/themes/powerlevel10k
+    local p10k_dir="$HOME/.oh-my-zsh/custom/themes/powerlevel10k"
+    if [[ -d "$p10k_dir" ]]; then
+        git -C "$p10k_dir" pull --depth=1 2>/dev/null || true
+    else
+        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$p10k_dir"
+    fi
 }
 
 init
 install_debs
 setup_ssh "rupanshu.ganvir@gmail.com"
+install_tmux_plugins
 install_ohmyzsh
 install_p10k
 setup_dotfiles "https://github.com/theQmech/.files"
