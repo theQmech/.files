@@ -111,12 +111,16 @@ setup_dotfiles() {
 
     echo "Copying dotfiles directly (no symlinks)..."
     # Remove any existing files/symlinks to avoid symlink collisions or stale links
-    rm -rf ~/.gitconfig ~/.vimrc ~/.tmux.conf ~/.zshrc ~/helperbin ~/.config/terminator
+    rm -rf ~/.gitconfig ~/.vimrc ~/.tmux.conf ~/.zshrc ~/.p10k.zsh ~/helperbin ~/.config/terminator
 
     cp "$dotfiles_dir/gitconfig" ~/.gitconfig
     cp "$dotfiles_dir/vimrc" ~/.vimrc
     cp "$dotfiles_dir/tmux.conf" ~/.tmux.conf
     cp "$dotfiles_dir/zshrc" ~/.zshrc
+
+    if [[ -f "$dotfiles_dir/p10k.zsh" ]]; then
+        cp "$dotfiles_dir/p10k.zsh" ~/.p10k.zsh
+    fi
 
     if [[ -d "$dotfiles_dir/helperbin" ]]; then
         cp -r "$dotfiles_dir/helperbin" ~/helperbin
