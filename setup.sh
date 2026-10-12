@@ -109,12 +109,26 @@ setup_dotfiles() {
         dotfiles_dir="$(pwd)/.files"
     fi
 
-    # Copy dotfiles
-    echo "Setting up dotfiles..."
+    echo "Copying dotfiles directly (no symlinks)..."
+    # Remove any existing files/symlinks to avoid symlink collisions or stale links
+    rm -rf ~/.gitconfig ~/.vimrc ~/.tmux.conf ~/.zshrc ~/helperbin ~/.config/terminator
+
     cp "$dotfiles_dir/gitconfig" ~/.gitconfig
     cp "$dotfiles_dir/vimrc" ~/.vimrc
     cp "$dotfiles_dir/tmux.conf" ~/.tmux.conf
     cp "$dotfiles_dir/zshrc" ~/.zshrc
+
+    if [[ -d "$dotfiles_dir/helperbin" ]]; then
+        cp -r "$dotfiles_dir/helperbin" ~/helperbin
+    fi
+
+    if [[ -d "$dotfiles_dir/terminator" ]]; then
+        mkdir -p ~/.config
+        cp -r "$dotfiles_dir/terminator" ~/.config/terminator
+    fi
+
+    # Ensure Vim undo and autoload directories exist
+    mkdir -p ~/.vim/undo ~/.vim/autoload
 
     # Install vim plugins defined in ~/.vimrc
     vim +PlugInstall +qall || true
