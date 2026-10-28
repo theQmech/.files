@@ -178,10 +178,20 @@ install_p10k() {
     fi
 }
 
+install_zsh_autosuggestions() {
+    local plugin_dir="$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+    if [[ -d "$plugin_dir" ]]; then
+        git -C "$plugin_dir" pull --depth=1 2>/dev/null || true
+    else
+        git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git "$plugin_dir"
+    fi
+}
+
 init
 install_debs
 setup_ssh "rupanshu.ganvir@gmail.com"
 install_tmux_plugins
 install_ohmyzsh
 install_p10k
+install_zsh_autosuggestions
 setup_dotfiles "https://github.com/theQmech/.files"
