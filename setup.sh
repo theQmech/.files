@@ -8,6 +8,24 @@ cleanup() {
 }
 trap cleanup EXIT
 
+SETUP_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/setup"
+
+# Handle --force flag: clear all state markers and re-run everything
+if [[ "${1:-}" == "--force" ]]; then
+    echo "Force mode: clearing all state markers..."
+    rm -rf "$SETUP_STATE_DIR"
+    shift
+fi
+
+is_done() {
+    [[ -f "$SETUP_STATE_DIR/$1.done" ]]
+}
+
+mark_done() {
+    mkdir -p "$SETUP_STATE_DIR"
+    touch "$SETUP_STATE_DIR/$1.done"
+}
+
 init() {
     mkdir -p ~/install
 }
@@ -55,6 +73,10 @@ setup_ssh() {
 }
 
 install_debs() {
+    if is_done "install_debs"; then
+        echo "install_debs: already done, skipping"
+        return 0
+    fi
     sudo apt update
     sudo apt install -y git tmux vim zsh curl wget
     curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
@@ -63,9 +85,14 @@ install_debs() {
     if [[ "$SHELL" != *"zsh"* ]]; then
         sudo chsh -s "$(which zsh)" "$USER"
     fi
+    mark_done "install_debs"
 }
 
 install_tmux_plugins() {
+    if is_done "install_tmux_plugins"; then
+        echo "install_tmux_plugins: already done, skipping"
+        return 0
+    fi
     local plugins_dir="$HOME/.tmux/plugins"
     mkdir -p "$plugins_dir"
 
@@ -86,9 +113,14 @@ install_tmux_plugins() {
         echo "Cloning tmux-continuum..."
         git clone --depth=1 https://github.com/tmux-plugins/tmux-continuum "$plugins_dir/tmux-continuum"
     fi
+    mark_done "install_tmux_plugins"
 }
 
 setup_dotfiles() {
+    if is_done "setup_dotfiles"; then
+        echo "setup_dotfiles: already done, skipping"
+        return 0
+    fi
     local url="$1"
     local script_dir
     script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -141,9 +173,14 @@ setup_dotfiles() {
     tmux source-file ~/.tmux.conf 2>/dev/null || true
     
     echo "Dotfiles setup complete!"
+    mark_done "setup_dotfiles"
 }
 
 install_ohmyzsh() {
+    if is_done "install_ohmyzsh"; then
+        echo "install_ohmyzsh: already done, skipping"
+        return 0
+    fi
     # Check if Oh My Zsh is already installed
     if [ -d ~/.oh-my-zsh ]; then
         echo "Oh My Zsh is already installed at ~/.oh-my-zsh"
@@ -167,24 +204,35 @@ install_ohmyzsh() {
     RUNZSH=no CHSH=no sh ~/install/ohmyzshinstall.sh --unattended
     
     echo "Oh My Zsh installation complete!"
+    mark_done "install_ohmyzsh"
 }
 
 install_p10k() {
+    if is_done "install_p10k"; then
+        echo "install_p10k: already done, skipping"
+        return 0
+    fi
     local p10k_dir="$HOME/.oh-my-zsh/custom/themes/powerlevel10k"
     if [[ -d "$p10k_dir" ]]; then
         git -C "$p10k_dir" pull --depth=1 2>/dev/null || true
     else
         git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$p10k_dir"
     fi
+    mark_done "install_p10k"
 }
 
 install_zsh_autosuggestions() {
+    if is_done "install_zsh_autosuggestions"; then
+        echo "install_zsh_autosuggestions: already done, skipping"
+        return 0
+    fi
     local plugin_dir="$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
     if [[ -d "$plugin_dir" ]]; then
         git -C "$plugin_dir" pull --depth=1 2>/dev/null || true
     else
         git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git "$plugin_dir"
     fi
+    mark_done "install_zsh_autosuggestions"
 }
 
 init
